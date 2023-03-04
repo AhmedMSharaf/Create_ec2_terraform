@@ -1,11 +1,11 @@
 resource "aws_instance" "ec2_instance" {
-  ami = "ami-0c0933ae5caf0f5f9"
+  ami = "ami-0d8f9265cd415c863"
   instance_type = "t2.micro"
   subnet_id = aws_subnet.public_subnet.id
   associate_public_ip_address = true
   vpc_security_group_ids = [aws_security_group.sharaf_security.id]
   tags = {
-    Name = "ec2-instance"
+    Name = var.tage-name
   }
 }
 resource "aws_vpc" "vpc_sharaf" {
