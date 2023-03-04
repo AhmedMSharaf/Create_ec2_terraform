@@ -13,3 +13,12 @@ provider "aws" {
 
 }
 
+terraform {
+    backend "s3" {
+    bucket = "sharaf-s3-backut"
+    key    = "terraform.tfstate"
+    region = "eu-central-1"
+  }
+}
+
+

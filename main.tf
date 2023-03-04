@@ -1,35 +1,78 @@
-resource "aws_instance" "my-ec2"{
-    ami="ami-0c0933ae5caf0f5f9"
-    instance_type="t2.micro"
-    tags = {
-    Name = "ec-sharaf"
+resource "aws_vpc" "vpc_sharaf" {
+  cidr_block = "10.0.0.0/16"
+  tags = {
+    Name = "vpc-sharaf"
+  }
+}
+
+resource "aws_subnet" "public_subnet" {
+  vpc_id = aws_vpc.vpc_sharaf.id
+  cidr_block = "10.0.1.0/24"
+  availability_zone = "eu-central-1a"
+  tags = {
+    Name = "public subnet"
+  }
+}
+
+resource "aws_subnet" "private_subnet" {
+  vpc_id = aws_vpc.vpc_sharaf.id
+  cidr_block = "10.0.2.0/24"
+  availability_zone = "eu-central-1a"
+  tags = {
+    Name = "private subnet"
+  }
+}
+
+# Define the security group
+resource "aws_security_group" "sharaf_security" {
+  name_prefix = "sharaf-security"
+  vpc_id = aws_vpc.vpc_sharaf.id
+
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
-}
-resource  "aws_eip" "my-eip"{
-    vpc = true
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "sharaf-security"
+  }
 }
 
-resource "aws_eip_association" "associate"{
-    instance_id=aws_instance.my-ec2.id
-    allocation_id=aws_eip.my-eip.id
-
+# Define the EC2 instance
+resource "aws_instance" "ec2_instance" {
+  ami = "ami-0c0933ae5caf0f5f9"
+  instance_type = "t2.micro"
+  subnet_id = aws_subnet.public_subnet.id
+  associate_public_ip_address = true
+  vpc_security_group_ids = [aws_security_group.sharaf_security.id]
+  tags = {
+    Name = "ec2-instance"
+  }
 }
 output "eip_value" {
     description = "VMs Private IP"
-    value= aws_instance.my-ec2.public_ip
+    value= aws_instance.ec2_instance.public_ip
   
 
 }
 output "subnet_id" {
     description = "VMs Private IP"
-    value= aws_instance.my-ec2.subnet_id
+    value= aws_instance.ec2_instance.subnet_id
   
 
 }
 output "private_ip" {
     description = "VMs Private IP"
-    value= aws_instance.my-ec2.private_ip
+    value= aws_instance.ec2_instance.private_ip
   
 
 }
